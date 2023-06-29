@@ -17,3 +17,7 @@
 .App-link {
   color: #61dafb;
 }
+.main_title {
+  text-align: left;
+  padding-left: 30px;
+}

@@ -2,10 +2,10 @@ import { Component } from 'react';
 import AddContact from './components/AddContact/AddContact';
 import Contacts from './components/Contacts/Contacts';
 import Filter from 'components/Filter/Filter';
-
 import './app.css';
 import css from './components/Contacts/contacts.module.css';
 import { nanoid } from 'nanoid';
+import PropTypes from 'prop-types';
 
 class App extends Component {
   state = {
@@ -18,63 +18,69 @@ class App extends Component {
     filter: '',
   };
 
-  onContactCreate = data => {
-    this.setState({ name: data.name, number: data.number });
+  filterChange = value => {
+    this.setState({ filter: value });
+  };
 
-    const duplicateName = this.state.contacts
-      .map(contact => contact.name)
-      .includes(data.name);
+  onContactCreate = (name, number) => {
+    const duplicateName = this.state.contacts.some(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
 
     if (duplicateName) {
       alert('this name is in the contact list!!');
-    } else {
-      const newContact = {
-        ...data,
-        id: nanoid(),
-      };
-      this.setState({
-        contacts: [...this.state.contacts, newContact],
-      });
+      return;
     }
 
-    console.log(this.state.contacts);
+    this.setState(prevState => ({
+      contacts: [
+        ...prevState.contacts,
+        { id: nanoid(), name: name, number: number },
+      ],
+    }));
   };
 
-
-  onGetFilterData = filterData => {
-    this.setState({ filter: filterData.filter });
-    console.log(this.state.filter);
-  };
-
-  
   onDeleteContact = contactId => {
-    this.setState({
-      contacts: this.state.contacts.filter(contact => contact.id !== contactId),
-    });
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
   };
 
-  
   render() {
-    const { contacts, name, number, filter } = this.state;
+    const onGetFilterData = this.state.contacts.filter(contact =>
+      contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
+    );
 
     return (
       <div className="App">
-        <AddContact
-          contacts={contacts}
-          name={name}
-          number={number}
-          onFormSubmit={this.onContactCreate}
-        />
-        <h1 className={css.title}>Contacts</h1>
-        <Filter filter={filter} onGetFilterData={this.onGetFilterData} />
-        <Contacts
-          contacts={contacts}
-          filter={filter}
-          onDelete={this.onDeleteContact}
-        />
+        <AddContact onContactCreate={this.onContactCreate} />
+        <h1 className={css.title}>Find contacts by name</h1>
+        <Filter state={this.state} filterChange={this.filterChange} />
+        <h1 class="main_title">Contacts</h1>
+        {this.state.filter === '' ? (
+          <Contacts
+            contacts={this.state.contacts}
+            onDeleteContact={this.onDeleteContact}
+          />
+        ) : (
+          <Contacts contacts={onGetFilterData} />
+        )}
       </div>
     );
   }
 }
+App.propTypes = {
+  contacts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      number: PropTypes.string,
+    })
+  ),
+  filter: PropTypes.string,
+  filterChange: PropTypes.func,
+  onContactCreate: PropTypes.func,
+  onDeleteContact: PropTypes.func,
+};
 
 export default App;
