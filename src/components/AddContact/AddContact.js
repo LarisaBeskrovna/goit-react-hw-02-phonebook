@@ -66,10 +66,6 @@ class AddContact extends Component {
 }
 
 AddContact.propTypes = {
-  state: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    number: PropTypes.string.isRequired,
-  }),
   onContactCreate: PropTypes.func.isRequired,
 };
 

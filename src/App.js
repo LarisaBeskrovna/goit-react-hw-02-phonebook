@@ -5,7 +5,6 @@ import Filter from 'components/Filter/Filter';
 import './app.css';
 import css from './components/Contacts/contacts.module.css';
 import { nanoid } from 'nanoid';
-import PropTypes from 'prop-types';
 
 class App extends Component {
   state = {
@@ -18,8 +17,8 @@ class App extends Component {
     filter: '',
   };
 
-  filterChange = value => {
-    this.setState({ filter: value });
+  filterChange = e => {
+    this.setState({ filter: e.target.value });
   };
 
   onContactCreate = (name, number) => {
@@ -46,41 +45,25 @@ class App extends Component {
     }));
   };
 
-  render() {
-    const onGetFilterData = this.state.contacts.filter(contact =>
+  onGetFilterData = () =>
+    this.state.contacts.filter(contact =>
       contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
     );
-
+  render() {
+    const filteredContacts = this.onGetFilterData();
     return (
       <div className="App">
         <AddContact onContactCreate={this.onContactCreate} />
         <h1 className={css.title}>Find contacts by name</h1>
         <Filter state={this.state} filterChange={this.filterChange} />
         <h1 class="main_title">Contacts</h1>
-        {this.state.filter === '' ? (
-          <Contacts
-            contacts={this.state.contacts}
-            onDeleteContact={this.onDeleteContact}
-          />
-        ) : (
-          <Contacts contacts={onGetFilterData} />
-        )}
+        <Contacts
+          contacts={filteredContacts}
+          onDeleteContact={this.onDeleteContact}
+        />
       </div>
     );
   }
 }
-App.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string,
-      name: PropTypes.string,
-      number: PropTypes.string,
-    })
-  ),
-  filter: PropTypes.string,
-  filterChange: PropTypes.func,
-  onContactCreate: PropTypes.func,
-  onDeleteContact: PropTypes.func,
-};
 
 export default App;
